@@ -1,0 +1,107 @@
+!Command: show running-config
+!Time: Sun Sep 27 21:00:00 2026
+
+version 10.3(2) Bios:version 05.47
+hostname dc1-leaf1
+feature bgp
+feature tacacs+
+feature nv overlay
+feature vn-segment-vlan-based
+feature lldp
+ip domain-name northwind.example
+ip name-server 192.0.2.53 use-vrf management
+ntp server 203.0.113.5 use-vrf management
+logging server 198.51.100.50 5 use-vrf management
+logging source-interface loopback0
+snmp-server community nwro ro
+snmp-server location DC1 Row 4 Rack 2
+snmp-server contact noc@northwind.example
+tacacs-server key 7 Nw7Secret
+tacacs-server host 192.0.2.60
+aaa authentication login default group tacacs+ local
+username ops password 5 $5$abcdefgh$ABCDEFGHIJKLMNOPQRSTUV role network-operator
+lldp holdtime 120
+fabric forwarding anycast-gateway-mac 0200.0a00.0001
+vlan 100
+  name POS-TILLS
+  vn-segment 10100
+vlan 110
+  name CCTV
+  vn-segment 10110
+vlan 200
+  name WMS-APP
+  vn-segment 10200
+vlan 300
+  name BACKUP-REPL
+  vn-segment 10300
+vrf context STORES
+  vni 50001
+  rd auto
+  address-family ipv4 unicast
+    route-target import 65100:50001 evpn
+    route-target export 65100:50001 evpn
+interface Vlan100
+  no shutdown
+  vrf member STORES
+  ip address 10.20.100.1/24
+  fabric forwarding mode anycast-gateway
+interface Vlan110
+  no shutdown
+  vrf member STORES
+  ip address 10.20.110.1/24
+  fabric forwarding mode anycast-gateway
+interface Vlan200
+  no shutdown
+  vrf member SUPPLY
+  ip address 10.30.200.1/24
+  fabric forwarding mode anycast-gateway
+interface nve1
+  no shutdown
+  host-reachability protocol bgp
+  source-interface loopback1
+  member vni 10100
+    ingress-replication protocol bgp
+  member vni 10110
+    ingress-replication protocol bgp
+  member vni 10200
+    ingress-replication protocol bgp
+  member vni 10300
+    ingress-replication protocol bgp
+evpn
+  vni 10100 l2
+    rd auto
+    route-target import 65100:10100
+    route-target export 65100:10100
+  vni 10110 l2
+    rd auto
+    route-target import 65100:10110
+    route-target export 65100:10110
+  vni 10200 l2
+    rd auto
+    route-target import 65100:10200
+    route-target export 65100:10200
+  vni 10300 l2
+    rd auto
+    route-target import 65100:10300
+    route-target export 65100:10300
+interface Ethernet1/49
+  description to-dc1-spine1
+  no switchport
+  mtu 9216
+  ip address 198.51.100.1/31
+  no shutdown
+router bgp 65102
+  router-id 192.0.2.11
+  log-neighbor-changes
+  address-family ipv4 unicast
+    maximum-paths 4
+  neighbor 198.51.100.0
+    remote-as 65100
+    description SPINE-01
+    address-family ipv4 unicast
+  neighbor 192.0.2.1
+    remote-as 65100
+    update-source loopback0
+    ebgp-multihop 5
+    address-family l2vpn evpn
+      send-community extended

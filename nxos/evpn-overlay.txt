@@ -1,0 +1,9 @@
+router bgp 65013
+  router-id 10.255.0.13
+  neighbor 10.255.0.2
+    remote-as 65000
+    update-source loopback0
+    ebgp-multihop 5
+    description spine2-evpn
+    address-family l2vpn evpn
+      send-community extended

@@ -1,0 +1,8 @@
+vrf context PROD
+  vni 50010
+  rd auto
+  address-family ipv4 unicast
+    route-target import 65000:50010
+    route-target import 65000:50010 evpn
+    route-target export 65000:50010
+    route-target export 65000:50010 evpn

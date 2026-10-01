@@ -1,0 +1,6 @@
+interface port-channel30
+  switchport mode access
+  switchport access vlan 305
+  vpc 30
+interface Ethernet1/11
+  channel-group 30 mode active

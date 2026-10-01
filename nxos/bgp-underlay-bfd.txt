@@ -1,0 +1,12 @@
+interface Ethernet1/50
+  description spine-2
+  no switchport
+  mtu 9216
+  ip address 10.0.3.3/31
+  no shutdown
+router bgp 65023
+  router-id 10.255.0.23
+  address-family ipv4 unicast
+    maximum-paths 2
+  neighbor 10.0.3.2 remote-as 65001
+    address-family ipv4 unicast
